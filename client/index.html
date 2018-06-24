@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Game</title>
+  <link rel="stylesheet" type="text/css" href="/client/styles.css">
+</head>
+<body>
+  <!-- <p>Game</p>
+  <p>
+    <button id='btnClick' onclick="sendMessage();">Click</button>
+  </p> -->
+  <canvas id="ctx" width="500" height="500" style="border: 1px solid #4e4e4e;"></canvas>
+  <div id="chat-text">
+    <div>Hello!</div>
+  </div>
+  <form id="chat-form">
+    <input id="chat-input" type="text"/>
+  </form>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js" 
+  integrity="sha256-ji09tECORKvr8xB9iCl8DJ8iNMLriDchC1+p+yt1hSs=" crossorigin="anonymous"></script>
+  <script src="./client/js/client.js"></script>
+</body>
+</html>
