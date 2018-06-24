@@ -6,14 +6,21 @@ let USERS = {
   "forrest": "123"
 }
 
-let isLoginValid = function (data) {
-  return USERS[data.username] === data.password;
+let isLoginValid = function (data, callback) {
+  setTimeout(function () {
+    callback(USERS[data.username] === data.password);
+  }, 10);
 }
-let isUsernameTaken = function (data) {
-  return USERS[data.username];
+let isUsernameTaken = function (data, callback) {
+  setTimeout(function () {
+    callback(USERS[data.username]);
+  }, 10);
 }
-let addUser = function (data) {
-  USERS[data.username] = data.password;
+let addUser = function (data, callback) {
+  setTimeout(function () {
+    USERS[data.username] = data.password;
+    callback();
+  }, 10);
 }
 
 const express = require("express");
