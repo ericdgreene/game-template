@@ -1,9 +1,10 @@
-body, * {
+body,
+* {
   font-family: Arial, Helvetica, sans-serif;
 }
 
 #game {
-  display:none;
+  display: none;
 }
 
 #chat-text {
@@ -12,9 +13,9 @@ body, * {
   height: 100px;
   overflow-y: scroll;
 }
-form#chat-form{
 
-}
+/* form#chat-form {} */
+
 form#chat-form input#chat-input {
   width: 500px;
 }
