@@ -22,6 +22,8 @@ let addUser = function(data, callback) {
     callback();
   }, 10);
 };
+const mongojs = require("mongojs");
+const db = mongojs('localhost:27017/myGame', ['account','progress']);
 
 const express = require("express");
 const app = express();
