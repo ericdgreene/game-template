@@ -7,14 +7,25 @@ let USERS = {
 };
 
 let isLoginValid = function(data, callback) {
-  setTimeout(function() {
-    callback(USERS[data.username] === data.password);
-  }, 10);
+  db.account.find(
+    { username: data.username, password: data.password },
+    function(err, res) {
+      console.log(`callback: ${res.length}`);
+      return callback ? res.length > 0 : (res.length = 0);
+      // console.log(callback);
+      // if (res.length > 0) {
+      //   callback(true);
+      // } else {
+      //   callback(false);
+      // }
+    }
+  );
 };
 let isUsernameTaken = function(data, callback) {
-  setTimeout(function() {
-    callback(USERS[data.username]);
-  }, 10);
+  db.account.find({ username: data.username }, function(err, res) {
+    console.log(`callback: ${res.length}`);
+    return callback ? res.length > 0 : (res.length = 0);
+  });
 };
 let addUser = function(data, callback) {
   setTimeout(function() {
@@ -23,7 +34,7 @@ let addUser = function(data, callback) {
   }, 10);
 };
 const mongojs = require("mongojs");
-const db = mongojs('localhost:27017/myGame', ['account','progress']);
+const db = mongojs("localhost:27017/myGame", ["account", "progress"]);
 
 const express = require("express");
 const app = express();
@@ -213,6 +224,7 @@ io.sockets.on("connection", function(socket) {
 
   socket.on("login", function(data) {
     isLoginValid(data, function(res) {
+      // console.log(data);
       if (res) {
         socket.emit("loginResponse", {
           success: true
