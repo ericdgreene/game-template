@@ -1,34 +1,34 @@
 let DEBUG = false;
 
 let USERS = {
-  "bob": "asdf",
-  "eric": "eric",
-  "forrest": "123"
-}
+  bob: "asdf",
+  eric: "eric",
+  forrest: "123"
+};
 
-let isLoginValid = function (data, callback) {
-  setTimeout(function () {
+let isLoginValid = function(data, callback) {
+  setTimeout(function() {
     callback(USERS[data.username] === data.password);
   }, 10);
-}
-let isUsernameTaken = function (data, callback) {
-  setTimeout(function () {
+};
+let isUsernameTaken = function(data, callback) {
+  setTimeout(function() {
     callback(USERS[data.username]);
   }, 10);
-}
-let addUser = function (data, callback) {
-  setTimeout(function () {
+};
+let addUser = function(data, callback) {
+  setTimeout(function() {
     USERS[data.username] = data.password;
     callback();
   }, 10);
-}
+};
 
 const express = require("express");
 const app = express();
 const server = require("http").Server(app);
 const port = 5050;
 
-app.get("/", function (req, res) {
+app.get("/", function(req, res) {
   res.sendFile(__dirname + "/client/index.html");
 });
 app.use("/client", express.static(__dirname + "/client"));
@@ -44,7 +44,7 @@ const SOCKET_LIST = {};
 // const PLAYER_LIST = {};
 
 // Entity is super class of both player and bullet
-let Entity = function () {
+let Entity = function() {
   let self = {
     x: 250,
     y: 250,
@@ -52,20 +52,20 @@ let Entity = function () {
     ySpeed: 0,
     id: ""
   };
-  self.update = function () {
+  self.update = function() {
     self.updatePosition();
   };
-  self.updatePosition = function () {
+  self.updatePosition = function() {
     self.x += self.xSpeed;
     self.y += self.ySpeed;
   };
-  self.getDistance = function (pt) {
+  self.getDistance = function(pt) {
     return Math.sqrt(Math.pow(self.x - pt.x, 2) + Math.pow(self.y - pt.y, 2));
   };
   return self;
 };
 
-let Player = function (id) {
+let Player = function(id) {
   let self = Entity();
   self.id = id;
   self.number = Math.floor(10 * Math.random());
@@ -78,7 +78,7 @@ let Player = function (id) {
   self.mouseAngle = 0;
 
   let super_update = self.update;
-  self.update = function () {
+  self.update = function() {
     self.updateSpeed();
     super_update();
 
@@ -88,14 +88,14 @@ let Player = function (id) {
       }
     }
   };
-  self.shootBullet = function (angle) {
+  self.shootBullet = function(angle) {
     // console.log(`angle: ${angle}`);
     let b = Bullet(self.id, angle);
     b.x = self.x;
     b.y = self.y;
   };
 
-  self.updateSpeed = function () {
+  self.updateSpeed = function() {
     if (self.pressingRight) {
       self.xSpeed = self.maxSpeed;
     } else if (self.pressingLeft) {
@@ -116,10 +116,10 @@ let Player = function (id) {
 };
 
 Player.list = {};
-Player.onConnect = function (socket) {
+Player.onConnect = function(socket) {
   let player = Player(socket.id);
   // console.log(player);
-  socket.on("keyPress", function (data) {
+  socket.on("keyPress", function(data) {
     // console.log(`data: ${data}`);
     if (data.inputId == "left") {
       player.pressingLeft = data.state;
@@ -136,10 +136,10 @@ Player.onConnect = function (socket) {
     }
   });
 };
-Player.onDisconnect = function (socket) {
+Player.onDisconnect = function(socket) {
   delete Player.list[socket.id];
 };
-Player.update = function () {
+Player.update = function() {
   const dataPackage = [];
   for (let i in Player.list) {
     let player = Player.list[i];
@@ -153,7 +153,7 @@ Player.update = function () {
   return dataPackage;
 };
 
-let Bullet = function (parent, angle) {
+let Bullet = function(parent, angle) {
   var self = Entity();
   self.id = Math.random();
   self.xSpeed = Math.cos((angle / 180) * Math.PI) * 10;
@@ -163,7 +163,7 @@ let Bullet = function (parent, angle) {
   self.timer = 0;
   self.toRemove = false;
   var super_update = self.update;
-  self.update = function () {
+  self.update = function() {
     if (self.timer++ > 100) {
       self.toRemove = true;
     }
@@ -182,7 +182,7 @@ let Bullet = function (parent, angle) {
 };
 Bullet.list = {};
 
-Bullet.update = function () {
+Bullet.update = function() {
   // this just shoots random bullets on the screen
   // if (Math.random() < 0.1) {
   //   Bullet(Math.random() * 360);
@@ -205,52 +205,56 @@ Bullet.update = function () {
 };
 
 const io = require("socket.io")(server, {});
-io.sockets.on("connection", function (socket) {
+io.sockets.on("connection", function(socket) {
   socket.id = Math.random(); // assign each socket connection a unique ID
   SOCKET_LIST[socket.id] = socket; // add it to the list of players
 
-  socket.on('login', function (data) {
-    if (isLoginValid(data)) {
-      socket.emit('loginResponse', {
-        success: true
-      });
-      Player.onConnect(socket);
-    } else {
-      socket.emit('loginResponse', {
-        success: false
-      });
-    }
+  socket.on("login", function(data) {
+    isLoginValid(data, function(res) {
+      if (res) {
+        socket.emit("loginResponse", {
+          success: true
+        });
+        Player.onConnect(socket);
+      } else {
+        socket.emit("loginResponse", {
+          success: false
+        });
+      }
+    });
   });
-  socket.on('register', function (data) {
-    if (isUsernameTaken(data)) {
-      socket.emit('registerResponse', {
-        success: false
-      });
-    } else {
-      addUser(data);
-      socket.emit('registerResponse', {
-        success: true
-      });
-    }
+  socket.on("register", function(data) {
+    isUsernameTaken(data, function(res) {
+      if (res) {
+        socket.emit("registerResponse", {
+          success: false
+        });
+      } else {
+        addUser(data, function() {
+          socket.emit("registerResponse", {
+            success: true
+          });
+        });
+      }
+    });
   });
-
-  socket.on("disconnect", function () {
+  socket.on("disconnect", function() {
     delete SOCKET_LIST[socket.id];
     Player.onDisconnect(socket);
   });
 
-  socket.on("clientMsg", function (data) {
+  socket.on("clientMsg", function(data) {
     console.log(
       "Message from Client: " + data.message + " Number: " + data.number
     );
   });
-  socket.on("sendMsgToServer", function (data) {
+  socket.on("sendMsgToServer", function(data) {
     let playerName = ("" + socket.id).slice(2, 7);
     for (let i in SOCKET_LIST) {
       SOCKET_LIST[i].emit("addToChat", playerName + ": " + data);
     }
   });
-  socket.on("evalServer", function (data) {
+  socket.on("evalServer", function(data) {
     if (!DEBUG) {
       return;
     }
@@ -266,7 +270,7 @@ io.sockets.on("connection", function (socket) {
   });
 });
 
-setInterval(function () {
+setInterval(function() {
   const dataPackage = {
     player: Player.update(),
     bullet: Bullet.update()
