@@ -58,6 +58,90 @@ ctx.fillStyle = "red";
 ctx.font = "30px Arial";
 ctx.fillStyle = "blue";
 
+let Player = function (initPackage) {
+  // initPackage is the data sent from the server
+  let self = {}; // create an empty object
+  self.id = initPackage.id;
+  self.num = initPackage.num;
+  self.x = initPackage.x;
+  self.y = initPackage.y;
+  Player.list[self.id] = self;
+  return self;
+}
+Player.list = {};
+
+let Bullet = function (initPackage) {
+  // basically same as Player object
+  let self = {};
+  self.id = initPackage.id;
+  self.x = initPackage.x;
+  self.y = initPackage.y;
+  Bullet.list[self.id] = self;
+  return self;
+}
+Bullet.list = {};
+
+socket.on('init', function (data) {
+  // { player: [{id:123,number:'1',x:0,y:0},{id:1,number:'2',x:0,y:0}], bullet: [] }
+  for (let i = 0; i < data.player.length; i++) {
+    new Player(data.player[i]);
+  }
+  for (let i = 0; i < data.bullet.length; i++) {
+    new Bullet(data.bullet[i]);
+  }
+});
+
+socket.on('update', function (data) {
+  for (let i = 0; i < data.player.length; i++) {
+    let dataPackage = data.player[i];
+    let p = Player.list[dataPackage.id];
+    if (p) {
+      if (dataPackage.x !== undefined) {
+        p.x = dataPackage.x;
+      }
+      if (dataPackage.y !== undefined) {
+        p.y = dataPackage.y;
+      }
+    }
+  }
+  for (let i = 0; i < data.bullet.length; i++) {
+    let dataPackage = data.bullet[i];
+    let b = Bullet.list[data.bullet[i].id];
+    if (b) {
+      if (dataPackage.x !== undefined) {
+        b.x = dataPackage.x;
+      }
+      if (dataPackage.y !== undefined) {
+        b.y = dataPackage.y;
+      }
+    }
+  }
+});
+
+socket.on('remove', function (data) {
+  for (let i = 0; i < data.player.length; i++) {
+    delete Player.list[data.player[i]];
+  }
+  for (let i = 0; i < data.bullet.length; i++) {
+    delete Bullet.list[data.bullet[i]];
+  }
+});
+
+setInterval(function () {
+  ctx.clearRect(0, 0, 500, 500);
+  for (let i in Player.list) {
+    ctx.fillText(PLayer.list[i].num, Player.list[i].x, Player.list[i].y);
+  }
+  for (let i in Bullet.list) {
+    ctx.fillText(Bullet.list[i].x - 5, Bullet.list[i].y - 5, 10, 10);
+  }
+}, 40);
+// init code
+
+// update code
+
+// remove data
+
 socket.on("newPositions", function (data) {
   ctx.clearRect(0, 0, 500, 500);
   ctx.fillStyle = "red";
